@@ -1,0 +1,38 @@
+# Licencia de Uso Educativo – Ayi Academy IA Course
+
+Copyright (c) 2025  
+Desarrollado por Juan Hernández Morani  
+Basado en el plan de estudios de **Ayi Academy** / **Ayi Group**
+
+---
+
+Este repositorio y todos sus contenidos (código fuente, scripts, configuraciones, documentación y recursos asociados) se comparten bajo los siguientes términos:
+
+## 1. **Uso no comercial**
+Está **estrictamente prohibido** utilizar este código con fines comerciales, de lucro o como parte de productos o servicios de pago. El contenido es exclusivo para estudio, investigación, enseñanza o uso personal.
+
+## 2. **Atribución requerida**
+Toda persona o entidad que utilice o modifique este código **debe dar crédito explícito a**:
+
+- **Ayi Academy / Ayi Group**, como institución formadora.
+- **Juan Hernández Morani**, como autor y desarrollador del proyecto.
+
+Esto debe figurar en cualquier redistribución, documentación o publicación derivada.
+
+## 3. **Distribución con la misma licencia**
+Cualquier modificación, adaptación o redistribución de este código **debe compartirse bajo esta misma licencia**, sin agregar restricciones adicionales ni cambiar los términos aquí expuestos.
+
+## 4. **Libre uso sin garantías**
+Este software se proporciona **"tal cual"**, sin garantías de ningún tipo. El autor **no se responsabiliza** por daños, pérdidas, errores, fallas o consecuencias derivadas de su uso, mal uso o implementación.
+
+## 5. **Privacidad y datos confidenciales**
+Este repositorio **no debe incluir información privada, sensible ni confidencial**. Para dichos casos, se usarán archivos `.env` u otros mecanismos de exclusión explícita que **no se subirán** al repositorio.
+
+---
+
+Al usar este repositorio, aceptás automáticamente los términos de esta licencia.
+
+---
+
+Versión 1.0 – Julio 2025  
+Contacto: [juanhernandezmorani@gmail.com](mailto:juanhernandezmorani@gmail.com)
