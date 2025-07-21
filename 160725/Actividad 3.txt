@@ -1,0 +1,25 @@
+Data Scientist: DS
+Data Analyst: DA
+Data Engineer: DE
+Machine Learning Engineer: MLE
+Business Analyst: BA
+
+
+
+Crear dashboards para el equipo de marketing  -> BA
+
+Diseñar el flujo automatico de carga de datos desde una API  -> MLE
+
+Probar dist  -> DA
+
+Evaluar met  -> BA
+
+Ajustar un mod  -> MLE
+
+Armar una tabla  -> BA
+
+Validar la calidad  -> DE
+
+Especificar los KPIs  -> BA
+
+Entrenar una red  -> MLE

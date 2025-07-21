@@ -1,0 +1,8 @@
+1) Resolución de problemas del lado de la empresa: Reducción de tiempos de respuestas, mejora eficiencia en el trabajo de los empleados.
+   Resolución de problemas del lado del cliente: Reducción de tiempos de respuestas, atención 24/7, adaptabilidad en base a los gustos del cliente.
+
+2) Historial de preguntas frecuentes (Q/A), detalle de los servicios ofrecidos, información de contacto y detalle de horarios de atención del personal humano.
+
+3) Python (u otro lenguaje de programación versátil), modelos de procesamiento de lenguaje natural (o modelos pre entrenados), APIs, base de datos.
+
+4) Ahorro en costos operativos por el personal, imagen mas profesional de la empresa, perdida de la imagen de la empresa por falta de interacción humana, ahorro en los tiempos de respuesta.
