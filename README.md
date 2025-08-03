@@ -1,6 +1,6 @@
 # Curso de Inteligencia Artificial - Ayi Academy
 
-Este repositorio contiene los proyectos, prácticas y actividades realizadas durante mi cursada del **Curso de Especialización en Inteligencia Artificial** de [Ayi Academy](https://ayiacademy.com/).
+Este repositorio contiene los proyectos, prácticas y actividades realizadas durante mi cursada del **Curso de Especialización en Inteligencia Artificial** de [Ayi Academy](https://ayi.group/ayi-academy/).
 
 ---
 
