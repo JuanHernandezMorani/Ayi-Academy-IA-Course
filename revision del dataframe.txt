@@ -1,0 +1,11 @@
+# Dimensiones
+print("Filas y columnas:", df.shape)
+
+# Nombres de columnas
+print("Columnas:", df.columns)
+
+# Tipos de datos
+df.info()
+
+# Estadísticas básicas
+df.describe()
