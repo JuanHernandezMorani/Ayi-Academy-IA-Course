@@ -3,6 +3,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import Union, List
+import os
+import time
+from pathlib import Path
+import json
+import csv
+import xml.etree.ElementTree as ET
+
 
 def help(type: str):
     functions = {
@@ -88,6 +95,49 @@ def help(type: str):
     - condition: (opcional) filtro booleano para aplicar.
     Retorna un dict con las 3 medidas.
     """,
+        "table": """ table(data, col_labels, title="")
+    Crea y muestra una tabla visual a partir de datos tabulares.
+    - data: Lista de listas (ej: [[valor1, valor2], ...]) o DataFrame reducido.
+    - col_labels: Lista de etiquetas de columnas.
+    - title: (opcional) Título para mostrar encima de la tabla.
+    Se utiliza matplotlib para renderizar una tabla tipo resumen visual.
+    """,
+        "conditional": """ conditional(df, conditions, results, column_name)
+    Aplica condiciones lógicas para generar una nueva columna.
+    - df: DataFrame de entrada.
+    - conditions: Lista de condiciones booleanas.
+    - results: Lista de valores que se asignan cuando se cumplen las condiciones.
+    - column_name: Nombre de la nueva columna a crear.
+    Usa np.select para evaluar múltiples condiciones sobre el DataFrame.
+    """,
+        "heatmap": """ heatmap(df, index_col, column_col, value_col, title="")
+    Crea un gráfico tipo heatmap con una tabla de frecuencias cruzadas.
+    - df: DataFrame de entrada.
+    - index_col: Columna usada como eje Y (índice).
+    - column_col: Columna usada como eje X (columnas).
+    - value_col: Columna cuyos valores se cuentan para formar la matriz.
+    - title: (opcional) Título del gráfico.
+    Agrupa, cuenta y grafica con seaborn para visualizar densidad o frecuencia.
+    """,
+        "call": """
+    Busca un archivo por nombre (y opcionalmente tipo) en una carpeta dada (o desde cwd) de forma recursiva hacia abajo y luego hacia arriba, 
+    y lo carga dependiendo su tipo de forma automática.
+
+    Parámetros:
+        name (str): Nombre base del archivo, sin extensión.
+        type (str, opcional): Extensión esperada ('csv', 'json', 'xml'). Si no se pasa, puede devolver múltiples resultados.
+        path (str, opcional): Ruta inicial donde buscar. Si no se pasa, comienza desde el directorio actual (cwd).
+        tiempo (int, opcional): Tiempo máximo de búsqueda en segundos. Default: 5.
+        strict (bool, opcional): Si es True (default), lanzará error si hay más de un archivo con el mismo nombre pero distinta extensión 
+                                 sin que se haya especificado `type`. Si es False, devolverá un diccionario con todos los archivos encontrados.
+
+    Retorna:
+        - Si `type` fue especificado y el archivo se encuentra: contenido del archivo cargado.
+        - Si `type` no fue especificado:
+            - strict=True y múltiples coincidencias: lanza error.
+            - strict=False y múltiples coincidencias: dict {extensión: contenido}.
+        - Si no se encuentra ningún archivo: None
+    """,
     }
 
     if not isinstance(type, str):
@@ -105,7 +155,10 @@ def help(type: str):
             f'helper no contiene ninguna función con el nombre "{type}", los valores permitidos son: all, {", ".join(functions.keys())}'
         )
 
-def format_number(value: float, use_decimals: bool = True, decimals: int = 2, percent: bool = False) -> str:
+
+def format_number(
+    value: float, use_decimals: bool = True, decimals: int = 2, percent: bool = False
+) -> str:
     if percent:
         value *= 100
 
@@ -116,11 +169,12 @@ def format_number(value: float, use_decimals: bool = True, decimals: int = 2, pe
 
     # Se reemplaza ',' por '.' y '.' por ',' como se usa en Argentina
     formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
-    
+
     if percent:
         formatted += "%"
 
     return formatted
+
 
 def hbar(data: pd.Series, title: str, xlabel: str, ylabel: str):
     plt.figure(figsize=(12, 8))
@@ -137,14 +191,15 @@ def hbar(data: pd.Series, title: str, xlabel: str, ylabel: str):
     for i, bar in enumerate(bars):
         width = bar.get_width()
         plt.text(
-        width + 2,
-        bar.get_y() + bar.get_height() / 2,
-        format_number(width, use_decimals=False),
-        va="center",
-    )
+            width + 2,
+            bar.get_y() + bar.get_height() / 2,
+            format_number(width, use_decimals=False),
+            va="center",
+        )
 
     plt.tight_layout()
     plt.show()
+
 
 def vbar(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
     plt.figure(figsize=(12, 8))
@@ -159,13 +214,16 @@ def vbar(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
         height = bar.get_height()
         x = bar.get_x() + bar.get_width() / 2
         plt.text(
-            x, height + (height * 0.02),
+            x,
+            height + (height * 0.02),
             format_number(height, use_decimals=False),
-            ha="center", va="bottom"
+            ha="center",
+            va="bottom",
         )
 
     plt.tight_layout()
     plt.show()
+
 
 def pie(valores, etiquetas, colores, title: str, decimales: int = 1):
     fig, ax = plt.subplots()
@@ -174,7 +232,9 @@ def pie(valores, etiquetas, colores, title: str, decimales: int = 1):
     labels = etiquetas if use_labels else None
 
     def format_pct(pct):
-        return format_number(pct / 100, use_decimals=True, decimals=decimales, percent=True)
+        return format_number(
+            pct / 100, use_decimals=True, decimals=decimales, percent=True
+        )
 
     wedges, texts, autotexts = ax.pie(
         valores,
@@ -202,8 +262,10 @@ def pie(valores, etiquetas, colores, title: str, decimales: int = 1):
     plt.tight_layout()
     plt.show()
 
+
 def normalize(data: np.ndarray):
     return (data - data.min()) / (data.max() - data.min())
+
 
 def get_moda(
     data: np.ndarray, with_repetition: bool = False
@@ -222,11 +284,14 @@ def get_moda(
     else:
         return format_number(valores[index_moda])
 
+
 def get_media(data: np.ndarray, nan: bool = False) -> float:
     return format_number(np.nanmean(data) if nan else np.mean(data))
 
+
 def get_median(data: np.ndarray, nan: bool = False) -> float:
     return format_number(np.nanmedian(data) if nan else np.median(data))
+
 
 def boxplot(df: pd.DataFrame, x: str, y: str, hue: str = None, title: str = ""):
     plt.figure(figsize=(12, 6))
@@ -240,14 +305,18 @@ def boxplot(df: pd.DataFrame, x: str, y: str, hue: str = None, title: str = ""):
     plt.tight_layout()
     plt.show()
 
+
 def get_rank(df: pd.DataFrame, column: str) -> float:
     return format_number(np.nanmax(df[column]) - np.nanmin(df[column]))
+
 
 def get_var(df: pd.DataFrame, column: str) -> float:
     return format_number(np.nanvar(df[column]))
 
+
 def get_desv(df: pd.DataFrame, column: str) -> float:
     return format_number(np.nanstd(df[column]))
+
 
 def histo(
     df: pd.DataFrame,
@@ -270,6 +339,7 @@ def histo(
     plt.tight_layout()
     plt.show()
 
+
 def disp(df: pd.DataFrame, column: str, condition: pd.Series = None) -> dict:
     if condition is not None:
         df = df[condition]
@@ -279,3 +349,98 @@ def disp(df: pd.DataFrame, column: str, condition: pd.Series = None) -> dict:
         "varianza": get_var(df, column),
         "desviacion estandar": get_desv(df, column),
     }
+
+
+def table(data, col_labels, title=""):
+    fig, ax = plt.subplots()
+    ax.axis("off")
+
+    tabla = ax.table(cellText=data, colLabels=col_labels, cellLoc="center", loc="top")
+    tabla.auto_set_font_size(False)
+    tabla.set_fontsize(12)
+    tabla.scale(1.5, 1.5)
+
+    if title:
+        plt.title(title)
+
+    plt.tight_layout()
+    plt.show()
+
+
+def conditional(df, conditions, results, column_name):
+    df[column_name] = np.select(conditions, results, default=False)
+    return df
+
+
+def heatmap(df, index_col, column_col, value_col, title=""):
+    tabla = df.groupby([index_col, column_col])[value_col].size().unstack(fill_value=0)
+
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(
+        tabla, cmap="YlGnBu", annot=True, fmt="d", annot_kws={"size": 7}, linewidths=0.1
+    )
+    plt.title(title)
+    plt.xlabel(column_col)
+    plt.ylabel(index_col)
+    plt.xticks(rotation=0)
+    plt.tight_layout()
+    plt.show()
+
+
+def call(
+    name: str, type: str = None, path: str = None, tiempo: int = 5, strict: bool = True
+):
+    start_time = time.time()
+    path = Path(path) if path else Path.cwd()
+    name = Path(name).stem
+
+    def buscar_archivos(directorio):
+        encontrados = {}
+        for root, _, files in os.walk(directorio):
+            for file in files:
+                file_path = Path(root) / file
+                if file_path.stem == name:
+                    ext = file_path.suffix[1:].lower()
+                    if ext in ["csv", "json", "xml"]:
+                        encontrados[ext] = file_path
+            if time.time() - start_time > tiempo:
+                break
+        return encontrados
+
+    encontrados = buscar_archivos(path)
+
+    if type:
+        type = type.lower()
+        if type not in encontrados:
+            raise FileNotFoundError(
+                f"No se encontró el archivo '{name}.{type}' en '{path}'"
+            )
+        return _leer_archivo(encontrados[type], type)
+    else:
+        if not encontrados:
+            raise FileNotFoundError(
+                f"No se encontró ningún archivo con nombre '{name}' en '{path}'"
+            )
+        if len(encontrados) == 1:
+            ext, ruta = list(encontrados.items())[0]
+            return _leer_archivo(ruta, ext)
+        if strict:
+            raise ValueError(
+                f"Se encontraron múltiples archivos con el nombre '{name}': {list(encontrados.keys())}. Especificá el tipo o usá strict=False."
+            )
+        else:
+            return {ext: _leer_archivo(ruta, ext) for ext, ruta in encontrados.items()}
+
+
+def _leer_archivo(file_path: Path, ext: str):
+    if ext == "json":
+        with open(file_path, encoding="utf-8") as f:
+            return json.load(f)
+    elif ext == "csv":
+        with open(file_path, encoding="utf-8") as f:
+            return list(csv.DictReader(f))
+    elif ext == "xml":
+        tree = ET.parse(file_path)
+        return tree.getroot()
+    else:
+        raise ValueError(f"Tipo de archivo no soportado: {ext}")
