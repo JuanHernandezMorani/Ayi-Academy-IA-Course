@@ -10,6 +10,9 @@ import json
 import csv
 import xml.etree.ElementTree as ET
 
+NORMAL_SIZE = (10, 6)
+BIG_SIZE = (12, 8)
+
 
 def help(type: str):
     functions = {
@@ -159,6 +162,9 @@ def help(type: str):
 def format_number(
     value: float, use_decimals: bool = True, decimals: int = 2, percent: bool = False
 ) -> str:
+    if value is None or (isinstance(value, float) and np.isnan(value)):
+        return "N/A"
+
     if percent:
         value *= 100
 
@@ -176,8 +182,8 @@ def format_number(
     return formatted
 
 
-def hbar(data: pd.Series, title: str, xlabel: str, ylabel: str):
-    plt.figure(figsize=(12, 8))
+def hbar(data: pd.Series, title: str, xlabel: str, ylabel: str, save_path=None):
+    plt.figure(figsize=BIG_SIZE)
 
     y_pos = range(len(data))
     bars = plt.barh(y_pos, data.values, color="skyblue")
@@ -198,11 +204,13 @@ def hbar(data: pd.Series, title: str, xlabel: str, ylabel: str):
         )
 
     plt.tight_layout()
+    if save_path:
+        plt.savefig(save_path, bbox_inches="tight")
     plt.show()
 
 
 def vbar(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=BIG_SIZE)
     bars = plt.bar(data.index, data.values, color="skyblue")
 
     plt.title(title)
@@ -264,7 +272,8 @@ def pie(valores, etiquetas, colores, title: str, decimales: int = 1):
 
 
 def normalize(data: np.ndarray):
-    return (data - data.min()) / (data.max() - data.min())
+    range_val = data.max() - data.min()
+    return np.zeros_like(data) if range_val == 0 else (data - data.min()) / range_val
 
 
 def get_moda(
@@ -294,7 +303,7 @@ def get_median(data: np.ndarray, nan: bool = False) -> float:
 
 
 def boxplot(df: pd.DataFrame, x: str, y: str, hue: str = None, title: str = ""):
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=BIG_SIZE)
     sns.boxplot(data=df, x=x, y=y, hue=hue)
     plt.title(title)
     plt.xlabel(x)
@@ -328,7 +337,7 @@ def histo(
     if condition is not None:
         df = df[condition]
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=NORMAL_SIZE)
     plt.hist(
         df[column].dropna(), bins=bins, color="skyblue", edgecolor="black", alpha=0.7
     )
@@ -368,14 +377,19 @@ def table(data, col_labels, title=""):
 
 
 def conditional(df, conditions, results, column_name):
-    df[column_name] = np.select(conditions, results, default=False)
-    return df
+    try:
+        if len(conditions) != len(results):
+            raise ValueError("La cantidad de condiciones y resultados debe ser igual.")
+        df[column_name] = np.select(conditions, results, default=False)
+        return df
+    except Exception as e:
+        print(f"Error: {e}")
 
 
 def heatmap(df, index_col, column_col, value_col, title=""):
     tabla = df.groupby([index_col, column_col])[value_col].size().unstack(fill_value=0)
 
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=NORMAL_SIZE)
     sns.heatmap(
         tabla, cmap="YlGnBu", annot=True, fmt="d", annot_kws={"size": 7}, linewidths=0.1
     )
@@ -388,7 +402,12 @@ def heatmap(df, index_col, column_col, value_col, title=""):
 
 
 def call(
-    name: str, type: str = None, path: str = None, tiempo: int = 5, strict: bool = True
+    name: str,
+    type: str = None,
+    path: str = None,
+    tiempo: int = 5,
+    strict: bool = True,
+    verbose: bool = False,
 ):
     start_time = time.time()
     path = Path(path) if path else Path.cwd()
@@ -408,6 +427,9 @@ def call(
         return encontrados
 
     encontrados = buscar_archivos(path)
+    if verbose:
+        print(f"Buscando archivos desde: {path}")
+        print(f"Archivos encontrados: {list(encontrados.keys())}")
 
     if type:
         type = type.lower()
